@@ -1,5 +1,9 @@
 # Changelog
 
+## Documentation update — frontend 1.3 (2026-11-15)
+
+Updated discovery/language scope and remaining verified-data inputs. No backend API, runtime dependency, catalogue or database changes are required for local search/comparison and customer interface languages.
+
 ## 1.2.0 — 2026-11-15
 
 - Added explicit scheme/branch routing to approved institutions, with deterministic precedence and unassigned fallback. No institution associations or mailboxes are invented.

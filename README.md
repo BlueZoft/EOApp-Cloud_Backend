@@ -75,3 +75,5 @@ See [deployment checklist](docs/RELEASE.md) for required real-world values, roll
 ## Institution routing and staff inbox
 
 See [staff provisioning, routing and API guide](docs/STAFF.md). `STAFF_ENABLED=false` by default; there are no initial accounts or assumed institution mappings. Copy the empty directory template and supply actual approved institutions/mailboxes, then provision staff using the hidden-password operator command. The backend enforces institution isolation, CSRF protection and versioned status changes. Old records remain unassigned until an administrator reviews them.
+
+Frontend 1.3 adds local search/comparison and customer interface languages without changing backend routes, catalogue content or database records. Guided inquiry preparation does not make an eligibility decision; verified institution criteria and approved catalogue translations remain external inputs.

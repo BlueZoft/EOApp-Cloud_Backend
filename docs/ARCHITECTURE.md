@@ -16,7 +16,7 @@ The API no longer sends the inquiry's full document to clients or logs it. Notif
 
 Regression tests cover validation/false success, SMTP retry, duplicate races, legacy compatibility, CORS, malformed/large requests and readiness/rate limiting. Real SMTP delivery requires configured credentials and an approved test mailbox; it is not exercised by automated tests.
 
-Deferred: public tracking, current catalogue verification, multilingual translations and suitability recommendations. Institution routing and an officer inbox are implemented in version 1.2; see docs/STAFF.md. This release establishes the service boundaries and catalogue IDs needed for those features without adding them. A data retention policy, credential rotation and production sender/recipient configuration are deployment responsibilities.
+Deferred: public tracking, current catalogue verification, approved catalogue translations and verified eligibility recommendations. Frontend 1.3 adds local search/comparison, inquiry-preparation guidance and Sinhala/English/Tamil customer interface text without changing this API. Institution routing and an officer inbox are implemented in version 1.2; see docs/STAFF.md. This release establishes the service boundaries and catalogue IDs needed for those features without adding them. A data retention policy, credential rotation and production sender/recipient configuration are deployment responsibilities.
 
 ## Staff workflow in 1.2
 
