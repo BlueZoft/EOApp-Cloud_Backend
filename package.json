@@ -1,12 +1,13 @@
 {
   "name": "hetarataapi",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Backend API for Hetarata App",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "server": "node --watch index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "staff": "node scripts/staff.js"
   },
   "author": "Akila Ariyathilaka",
   "license": "MIT",

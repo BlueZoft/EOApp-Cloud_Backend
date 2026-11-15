@@ -1,3 +1,4 @@
+const { resolveRouting } = require('./routing');
 const { createHash } = require('node:crypto');
 function createInquiryService(Model, smtpEnabled) {
   return async (payload, submissionKey) => {
@@ -9,8 +10,10 @@ function createInquiryService(Model, smtpEnabled) {
     const existing = await Model.findOne({ submissionKey });
     if (existing) return check(existing);
     try {
+      const routing = await resolveRouting(payload);
       const doc = await Model.create({ ...payload, submissionKey, payloadHash,
-        notification: { status: smtpEnabled ? 'pending' : 'disabled', attempts: 0, nextAttemptAt: new Date() } });
+        institutionId: routing.institutionId,
+        notification: { recipient: routing.notificationRecipient, status: smtpEnabled ? 'pending' : 'disabled', attempts: 0, nextAttemptAt: new Date() } });
       return { doc, replay: false };
     } catch (error) {
       if (error.code !== 11000) throw error;

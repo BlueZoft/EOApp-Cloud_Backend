@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 — 2026-11-15
+
+- Added explicit scheme/branch routing to approved institutions, with deterministic precedence and unassigned fallback. No institution associations or mailboxes are invented.
+- Added an opt-in staff API with administrator/officer roles, salted scrypt passwords, expiring HttpOnly sessions, CSRF checks, login throttling/lockout and institution-scoped access.
+- Added versioned inquiry status updates, administrator reassignment and recent actor history. Staff responses omit NIC/address/age/gender.
+- Added operator commands for directory imports, staff provisioning/reset/disable and rule removal. No default accounts or public registration are supplied.
+- Added recipient snapshots and safe pending-recipient updates; reassignment is blocked during notification processing and does not resend delivered mail.
+- Documented real-world placeholders, HTTPS/same-site requirements, account operations and legacy-record behavior in `docs/STAFF.md`.
+
+Validation: all 25 backend tests pass, including routing, tenant isolation, CSRF, concurrent edits, session expiry/revocation and notification delivery. Full npm audit reports zero known vulnerabilities. Browser sign-in, scoped inbox/detail reads and logout were verified against a local API with synthetic institutions/accounts. No production account or real provider configuration was created.
+
 ## 1.1.0 — 2026-11-15
 
 - Added validated v1 inquiries, minimal receipts and persistent duplicate protection.

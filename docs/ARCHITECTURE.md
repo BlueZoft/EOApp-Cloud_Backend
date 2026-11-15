@@ -16,4 +16,8 @@ The API no longer sends the inquiry's full document to clients or logs it. Notif
 
 Regression tests cover validation/false success, SMTP retry, duplicate races, legacy compatibility, CORS, malformed/large requests and readiness/rate limiting. Real SMTP delivery requires configured credentials and an approved test mailbox; it is not exercised by automated tests.
 
-Deferred: institution-specific routing, an officer inbox, public tracking, current catalogue verification, multilingual translations and suitability recommendations. This release establishes the service boundaries and catalogue IDs needed for those features without adding them. A data retention policy, credential rotation and production sender/recipient configuration are deployment responsibilities.
+Deferred: public tracking, current catalogue verification, multilingual translations and suitability recommendations. Institution routing and an officer inbox are implemented in version 1.2; see docs/STAFF.md. This release establishes the service boundaries and catalogue IDs needed for those features without adding them. A data retention policy, credential rotation and production sender/recipient configuration are deployment responsibilities.
+
+## Staff workflow in 1.2
+
+RoutingRule pairs resolve new submissions to active Institution records. No mappings or accounts are bundled. Staff/StaffSession collections store salted password hashes and hashed, expiring cookie sessions. The optional staff router enforces active institution membership and CSRF checks. Inquiry workflow versions and recent history are updated atomically to prevent lost updates. Operational provisioning is a separate database-connected CLI; no public account creation is exposed.

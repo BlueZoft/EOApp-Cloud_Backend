@@ -11,7 +11,9 @@ function loadConfig(env = process.env) {
   }
   const smtpPort = Number(env.SMTP_PORT || 465);
   if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535) throw new Error('Invalid SMTP_PORT');
-  return { port, mongoUri: env.MONGO_URI, origins: (env.CORS_ORIGINS || 'http://localhost:8080').split(',').map(s => s.trim()),
+  if (env.STAFF_COOKIE_SECURE === 'false' && env.NODE_ENV !== 'development') throw new Error('Insecure staff cookies are only allowed in development');
+  if (env.STAFF_ENABLED && !['true', 'false'].includes(env.STAFF_ENABLED)) throw new Error('STAFF_ENABLED must be true or false');
+  return { staffEnabled: env.STAFF_ENABLED === 'true', staffCookieSecure: env.STAFF_COOKIE_SECURE !== 'false', port, mongoUri: env.MONGO_URI, origins: (env.CORS_ORIGINS || 'http://localhost:8080').split(',').map(s => s.trim()),
     smtpEnabled, smtp: { host: env.SMTP_HOST, port: smtpPort, secure: smtpPort === 465,
       requireTLS: smtpPort !== 465, auth: { user: env.SMTP_USER, pass: env.SMTP_PASSWORD },
       connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 20000 },

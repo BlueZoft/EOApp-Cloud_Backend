@@ -17,7 +17,7 @@ function createNotificationWorker(Model, config, transport = null) {
       ] }, { $set: { 'notification.status': 'processing', 'notification.leaseUntil': new Date(Date.now() + 120000) },
         $inc: { 'notification.attempts': 1 } }, { returnDocument: 'after' });
       if (!doc) return;
-      await mailer.sendMail({ from: config.mailFrom, to: config.mailTo,
+      await mailer.sendMail({ from: config.mailFrom, to: doc.notification.recipient || config.mailTo,
         subject: `Entrepreneur inquiry ${doc.id}`, text: notificationText(doc),
         messageId: `<inquiry-${doc.id}@eoapp.local>` });
       await Model.updateOne({ _id: doc._id }, { $set: { 'notification.status': 'sent' }, $unset: { 'notification.leaseUntil': 1 } });

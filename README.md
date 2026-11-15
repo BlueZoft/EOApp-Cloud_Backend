@@ -1,6 +1,6 @@
-# Hetarata / Entrepreneur Outreach API — 1.1
+# Hetarata / Entrepreneur Outreach API — 1.2
 
-Express and MongoDB API for the Sinhala credit catalogue's inquiry flow. This release makes receipt reliable, validates requests, and separates email delivery from submission. Existing catalogue text and rates are retained unchanged; their current availability has not been verified.
+Express and MongoDB API for the Sinhala credit catalogue's inquiry flow. This release makes receipt reliable, validates requests, and separates email delivery from submission. The opt-in staff inbox adds institution routing and follow-up statuses. Existing catalogue text and rates are retained unchanged; their current availability has not been verified.
 
 ## Run locally
 
@@ -28,7 +28,7 @@ See [API contract](docs/API.md) and [architecture and upgrade notes](docs/ARCHIT
 
 - `POST /api/v1/inquiries`: validated request, required `Idempotency-Key`, minimal receipt.
 - `POST /api/userdata`: deprecated compatibility adapter for the original frontend's field names. New clients must use v1. Legacy clients without a submission key do not receive duplicate protection.
-- No public inquiry lookup, listing, or management endpoints are exposed.
+- No public inquiry lookup, listing, or management endpoints are exposed. Authenticated internal staff routes are documented separately.
 
 The API runs as a persistent container/service. `index.js` starts the HTTP server and notification worker; `app.js` exports the Express factory without opening a port. The previous Lambda export was removed: simply wrapping this API in Lambda will not run the persistent notification worker. A serverless deployment needs a separate scheduled worker and connection lifecycle design.
 
@@ -71,3 +71,7 @@ The tracked `.env.example` contains intentionally unusable placeholders. Copy it
 Changing the committed placeholder does not rotate the historical password. Revoke it through the mail provider. Real SMTP validation remains pending until these values and an approved test recipient are available.
 
 See [deployment checklist](docs/RELEASE.md) for required real-world values, rollout checks, CI and proxy-aware Docker builds.
+
+## Institution routing and staff inbox
+
+See [staff provisioning, routing and API guide](docs/STAFF.md). `STAFF_ENABLED=false` by default; there are no initial accounts or assumed institution mappings. Copy the empty directory template and supply actual approved institutions/mailboxes, then provision staff using the hidden-password operator command. The backend enforces institution isolation, CSRF protection and versioned status changes. Old records remain unassigned until an administrator reviews them.

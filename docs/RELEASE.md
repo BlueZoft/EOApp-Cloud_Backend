@@ -39,3 +39,7 @@ The CA is used only while installing packages, not copied into the final image. 
 `.github/workflows/validate.yml` runs dependency installation, all tests with a MongoDB service, and the production dependency audit on pushes/pull requests. Local execution passing does not establish that GitHub-hosted runs have completed; inspect the Actions result for the pushed commit.
 
 Local evidence: all 13 backend tests passed, including authenticated local TLS delivery; the Docker image built and passed readiness, persistence/replay, non-root UID and absent-CA-secret runtime checks. Real provider delivery and production ingress routing still require the real-world values above.
+
+## Staff rollout in 1.2
+
+Before enabling `STAFF_ENABLED`, supply approved institution mappings/mailboxes and provision a named administrator/officers using [docs/STAFF.md](STAFF.md). Verify HTTPS same-site cookie behavior, staff access isolation, logout and a status update in the intended deployment. Keep Secure cookies enabled in production. Apply the retention/access policy to staff accounts, sessions and the latest 100 inquiry-history events. No existing inquiry is automatically backfilled.

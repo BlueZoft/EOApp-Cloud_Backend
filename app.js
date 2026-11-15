@@ -13,7 +13,7 @@ function createApp(config, { Model = Inquiry, ready = () => mongoose.connection.
   app.use(cors({ origin(origin, callback) {
     if (!origin || config.origins.includes(origin)) return callback(null, true);
     callback(Object.assign(new Error('Origin is not allowed'), { status: 403, code: 'ORIGIN_NOT_ALLOWED' }));
-  }, allowedHeaders: ['Content-Type', 'Idempotency-Key'], methods: ['GET', 'POST', 'OPTIONS'] }));
+  }, credentials: true, allowedHeaders: ['Content-Type', 'Idempotency-Key', 'X-CSRF-Token'], methods: ['GET', 'POST', 'PATCH', 'OPTIONS'] }));
   app.use((req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   app.get('/ready', (req, res) => res.status(ready() ? 200 : 503).json({ status: ready() ? 'ready' : 'unavailable' }));
@@ -35,6 +35,7 @@ function createApp(config, { Model = Inquiry, ready = () => mongoose.connection.
   }
   app.post('/api/v1/inquiries', limiter, route(false));
   app.post('/api/userdata', limiter, route(true));
+  app.use('/api/v1/staff', require('./routes/staff').createStaffRouter(config, ready));
   app.use((req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }));
   app.use(errorHandler);
   return app;
