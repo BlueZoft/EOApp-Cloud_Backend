@@ -19,5 +19,8 @@
   },
   "engines": {
     "node": ">=22 <25"
+  },
+  "devDependencies": {
+    "smtp-server": "^3.21.4"
   }
 }

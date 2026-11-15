@@ -14,6 +14,9 @@ test('rejects invalid age, choices, contact details and missing consent', () => 
 });
 test('SMTP defaults off and requires complete configuration when enabled', () => {
   assert.equal(loadConfig({}).smtpEnabled, false); assert.throws(() => loadConfig({ SMTP_ENABLED: 'true' }), /incomplete/);
+  assert.throws(() => loadConfig({ SMTP_ENABLED: 'yes' }), /true or false/);
+  assert.throws(() => loadConfig({ SMTP_ENABLED: 'true', SMTP_HOST: 'smtp.example.invalid', SMTP_USER: 'REPLACE_WITH_USERNAME',
+    SMTP_PASSWORD: 'REPLACE_WITH_PASSWORD', SMTP_FROM: 'from@example.invalid', SMTP_TO: 'to@example.invalid' }), /placeholders/);
 });
 test('notification includes loan and reference but omits NIC', () => {
   const body = notificationText({ ...payload, id: 'ref', askLoan: 'Loan', branch: 'Branch' });

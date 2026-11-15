@@ -14,3 +14,11 @@
 Validation: 12 tests passed against MongoDB 7, including concurrent duplicates and simulated SMTP failure/recovery. npm audit reported zero known vulnerabilities across installed dependencies. The persistent server's health and readiness endpoints responded successfully. External SMTP delivery was not tested.
 
 Deployment action: rotate the historical SMTP password and configure approved sender/recipient credentials before enabling delivery. Institution routing, catalogue modernization and public tracking remain deferred.
+
+### Follow-up validation and release preparation
+
+- Added an authenticated TLS SMTP integration test covering HTTP receipt, real local transport, persistence and duplicate replay. All 13 backend tests pass; real provider delivery still requires approved configuration.
+- Added GitHub Actions for MongoDB-backed tests and dependency audit. Hosted run completion must be checked independently.
+- Added startup rejection for SMTP placeholders and invalid enable flags.
+- Documented production values and rollout steps; added an optional BuildKit CA secret for trusted proxy builds.
+- Fixed Docker source ownership for the non-root runtime user. Container readiness, inquiry persistence/replay, runtime UID and absence of the build-time CA secret were verified. Temporary test containers, volumes and networks were removed.

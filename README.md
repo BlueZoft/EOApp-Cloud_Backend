@@ -39,7 +39,7 @@ npm test
 TEST_MONGO_URI=mongodb://127.0.0.1:27017 npm test
 ```
 
-The first command runs unit checks and explicitly skips database integration checks. The second runs all tests against a newly named, isolated test database and drops only that database afterward. It exercises real persistence, concurrent duplicate requests, CORS, error responses, database readiness, and simulated SMTP failure/retry. Tests never send external email.
+The first command runs unit checks and explicitly skips database integration checks. The second runs all tests against newly named, isolated test databases and drops only those databases afterward. OpenSSL is required to generate the disposable SMTP test certificate. It exercises real persistence, concurrent duplicate requests, CORS, error responses, database readiness, and simulated SMTP failure/retry. One integration test delivers to an authenticated local TLS SMTP server with a generated trusted certificate. Tests never send external email.
 
 ```sh
 docker build -t eoapp-api .
@@ -69,3 +69,5 @@ The tracked `.env.example` contains intentionally unusable placeholders. Copy it
 | Access/retention policy | Owner, authorized staff, and retention period for personal inquiry data |
 
 Changing the committed placeholder does not rotate the historical password. Revoke it through the mail provider. Real SMTP validation remains pending until these values and an approved test recipient are available.
+
+See [deployment checklist](docs/RELEASE.md) for required real-world values, rollout checks, CI and proxy-aware Docker builds.
