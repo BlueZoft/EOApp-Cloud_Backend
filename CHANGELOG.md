@@ -1,0 +1,16 @@
+# Changelog
+
+## 1.1.0 — 2026-11-15
+
+- Added validated v1 inquiries, minimal receipts and persistent duplicate protection.
+- Corrected status codes, CORS ordering, request limits and readiness behavior.
+- Added durable notification state, worker leases and SMTP retries; restored TLS verification.
+- Removed committed SMTP configuration and personal recipient; configure delivery securely.
+- Renamed the application model while retaining the users collection and legacy POST adapter.
+- Extracted the unchanged scheme/branch catalogue with stable IDs.
+- Updated runtime dependencies, removed unused packages and replaced nodemon with Node watch mode.
+- Added API, deployment and upgrade documentation and regression tests.
+
+Validation: 12 tests passed against MongoDB 7, including concurrent duplicates and simulated SMTP failure/recovery. npm audit reported zero known vulnerabilities across installed dependencies. The persistent server's health and readiness endpoints responded successfully. External SMTP delivery was not tested.
+
+Deployment action: rotate the historical SMTP password and configure approved sender/recipient credentials before enabling delivery. Institution routing, catalogue modernization and public tracking remain deferred.
