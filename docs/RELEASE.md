@@ -48,6 +48,8 @@ Use the frontend's `.env.deploy.example` for host/TLS/private-MongoDB/SMTP place
 
 Paired local rehearsal passed on 2026-11-16: real browser inquiry submission/replay, staff login with Secure/HttpOnly/Strict cookies, CSRF-protected status change, logout, TLS/redirects, security headers, body/rate limits and private/non-root containers. The runner removed only its disposable synthetic database and test resources.
 
+The frontend's `deploy/synthetic/README.md` now extends this to a retained local demo with a replaceable fictional directory/staff/applicant profile, authenticated STARTTLS capture, backup/restore, marked-record retention and outage/recovery reports. SMTP recipient domains are restricted to `@demo.test` in the capture service and no external email is relayed. A test CA is mounted only by that overlay; production SMTP verification remains unchanged. Policy intervals/owners are synthetic examples, not approved production schedules. Historical SMTP credential revocation still requires the provider administrator.
+
 ## Staff rollout in 1.2
 
 Before enabling `STAFF_ENABLED`, supply approved institution mappings/mailboxes and provision a named administrator/officers using [docs/STAFF.md](STAFF.md). Verify HTTPS same-site cookie behavior, staff access isolation, logout and a status update in the intended deployment. Keep Secure cookies enabled in production. Apply the retention/access policy to staff accounts, sessions and the latest 100 inquiry-history events. No existing inquiry is automatically backfilled.

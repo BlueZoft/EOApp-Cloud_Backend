@@ -1,5 +1,9 @@
 # Changelog
 
+## Synthetic deployment handoff — frontend 1.3.1 (2026-11-16)
+
+Documented the frontend's replaceable synthetic directory/staff/applicant profile, private authenticated STARTTLS capture and operations rehearsal. These use existing API/operator commands in a separate local database; no production seed, default account, runtime dependency or API change is introduced. Real SMTP credential revocation, operational policy approval and production identities remain explicit handoff items.
+
 ## 1.2.1 — 2026-11-16
 
 - Added bounded, explicit `TRUST_PROXY_HOPS` configuration, defaulting to zero. The paired Docker stack uses one hop behind its private, header-overwriting HTTPS edge.

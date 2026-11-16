@@ -2,6 +2,8 @@
 
 This release adds an internal staff workflow. It does not add credit approval, public inquiry tracking, institution self-registration or a new loan catalogue. Staff access is **off by default** and there are no built-in accounts.
 
+For local rehearsal, the frontend's `deploy/synthetic/profile.json` and `deploy/synthetic/README.md` provide labeled fictional institutions, two officers and an administrator. The runner imports them into its private synthetic database and generates fresh passwords; these are not backend defaults. Replace them for production using the approved directory and provisioning procedure below, never by importing the demo database.
+
 ## Configure real institutions
 
 The tracked `config/institutions.example.json` is intentionally empty. Copy it to ignored `config/institutions.json`. Fill it with approved institution names, notification mailboxes, and mappings. This is the format; the uppercase values below are documentation placeholders and must be replaced:
