@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1 — 2026-11-16
+
+- Added bounded, explicit `TRUST_PROXY_HOPS` configuration, defaulting to zero. The paired Docker stack uses one hop behind its private, header-overwriting HTTPS edge.
+- Pinned the Node Docker base image by digest and documented the paired frontend deployment, production placeholders and trust boundary.
+- Added regression checks for direct-host forwarding-header rejection, explicit proxy trust and invalid hop settings. All 28 backend tests passed with MongoDB integration enabled.
+
+Paired deployment validation: the frontend's disposable HTTPS rehearsal passed browser submission/replay, staff login/Secure cookies, CSRF-protected status update/logout, body/rate limits, verified TLS/redirects and private/non-root container checks. Email was disabled and synthetic data removed. Production SMTP/domain/database and operational identities remain owner-supplied inputs.
+
 ## Documentation update — frontend 1.3 (2026-11-15)
 
 Updated discovery/language scope and remaining verified-data inputs. No backend API, runtime dependency, catalogue or database changes are required for local search/comparison and customer interface languages.

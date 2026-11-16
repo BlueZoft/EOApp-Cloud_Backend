@@ -10,6 +10,7 @@ const { rateLimit } = require('./Middleware/rateLimit');
 function createApp(config, { Model = Inquiry, ready = () => mongoose.connection.readyState === 1, limiter = rateLimit() } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  if (config.trustProxyHops) app.set('trust proxy', config.trustProxyHops);
   app.use(cors({ origin(origin, callback) {
     if (!origin || config.origins.includes(origin)) return callback(null, true);
     callback(Object.assign(new Error('Origin is not allowed'), { status: 403, code: 'ORIGIN_NOT_ALLOWED' }));

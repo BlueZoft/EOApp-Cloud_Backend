@@ -38,7 +38,15 @@ The CA is used only while installing packages, not copied into the final image. 
 
 `.github/workflows/validate.yml` runs dependency installation, all tests with a MongoDB service, and the production dependency audit on pushes/pull requests. Local execution passing does not establish that GitHub-hosted runs have completed; inspect the Actions result for the pushed commit.
 
-Local evidence: all 13 backend tests passed, including authenticated local TLS delivery; the Docker image built and passed readiness, persistence/replay, non-root UID and absent-CA-secret runtime checks. Real provider delivery and production ingress routing still require the real-world values above.
+Local evidence: all 28 backend tests passed, including authenticated local TLS delivery, institution isolation, CSRF/version checks and explicit proxy trust. The Docker image built and passed readiness, persistence/replay, non-root UID and absent-CA-secret runtime checks. Real provider delivery and production ingress routing still require the real-world values above.
+
+## Docker-host release in 1.2.1
+
+The frontend repository contains the matching same-origin HTTPS stack and operator guide in `deploy/`. Deploy both repositories together. The edge terminates TLS, applies request/body limits, overwrites client forwarding headers and exposes `/api/ready`; the API and production database must remain private. Compose sets `TRUST_PROXY_HOPS=1` for that one-hop path. The default is `0` for direct hosting. Adding another ingress requires reviewing the trust chain instead of increasing the hop count blindly.
+
+Use the frontend's `.env.deploy.example` for host/TLS/private-MongoDB/SMTP placeholders. Configure actual institution mappings and named staff before enabling the portal. The disposable HTTPS rehearsal uses generated test identities and its own database; it never establishes real SMTP delivery or validates a public certificate/domain. See the frontend deployment guide for certificate renewal, release identification, rollback and the exact rehearsal command.
+
+Paired local rehearsal passed on 2026-11-16: real browser inquiry submission/replay, staff login with Secure/HttpOnly/Strict cookies, CSRF-protected status change, logout, TLS/redirects, security headers, body/rate limits and private/non-root containers. The runner removed only its disposable synthetic database and test resources.
 
 ## Staff rollout in 1.2
 

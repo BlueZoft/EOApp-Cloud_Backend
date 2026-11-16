@@ -1,4 +1,4 @@
-# Hetarata / Entrepreneur Outreach API — 1.2
+# Hetarata / Entrepreneur Outreach API — 1.2.1
 
 Express and MongoDB API for the Sinhala credit catalogue's inquiry flow. This release makes receipt reliable, validates requests, and separates email delivery from submission. The opt-in staff inbox adds institution routing and follow-up statuses. Existing catalogue text and rates are retained unchanged; their current availability has not been verified.
 
@@ -52,6 +52,8 @@ The container's `MONGO_URI` must point to MongoDB reachable from the container; 
 
 Rotate the previously committed SMTP password outside Git before enabling production mail. Removing it from the current source does not revoke it or remove it from history. Configure an approved sender and recipient; the application no longer contains a personal recipient address. Use HTTPS at the ingress, set production origins, and apply a shared/gateway rate limit for multiple replicas. The built-in 10 submissions/minute limiter is per process and sees the socket peer; forwarded IP headers are deliberately not trusted by default.
 
+For the selected Docker-host target, follow the frontend repository's `deploy/README.md` and `deploy/compose.yaml`. That stack keeps the API private behind a header-overwriting HTTPS edge and sets `TRUST_PROXY_HOPS=1`. Direct API hosting retains `0`; an extra CDN/load balancer needs a reviewed trust configuration. The Docker base image is pinned by digest. No production database or credentials are created by Compose.
+
 Delivery is at least once: a crash after SMTP accepts a message but before MongoDB records `sent` can cause a duplicate email. The stable inquiry reference/message ID helps operators recognize duplicates. Monitor pending/processing records and notification attempts. Do not log full records, NICs, addresses, credentials, or SMTP error objects. Set a retention/access policy before collecting production inquiries.
 
 ## Real-world values still required
@@ -62,6 +64,7 @@ The tracked `.env.example` contains intentionally unusable placeholders. Copy it
 | --- | --- |
 | `MONGO_URI` | Private database connection and credentials; the example is local-only |
 | `CORS_ORIGINS` | Actual HTTPS frontend origin(s) |
+| `TRUST_PROXY_HOPS` | Default `0`; `1` only behind the private, header-overwriting Docker edge |
 | `SMTP_HOST`, `SMTP_PORT` | Mail provider hostname and TLS port |
 | `SMTP_USER`, `SMTP_PASSWORD` | Provider username and a newly rotated password/app credential |
 | `SMTP_FROM`, `SMTP_TO` | Approved sender identity and authorized inquiry-team mailbox |

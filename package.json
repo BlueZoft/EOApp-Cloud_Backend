@@ -1,6 +1,6 @@
 {
   "name": "hetarataapi",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Backend API for Hetarata App",
   "main": "index.js",
   "scripts": {
