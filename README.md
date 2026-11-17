@@ -1,5 +1,7 @@
 # Hetarata / Entrepreneur Outreach API — 1.2.1
 
+The paired frontend's `docs/PROTOTYPE.md` is the prototype demonstration and release handoff. It covers the synthetic customer/staff walkthrough, captured TLS email, backup/restore and outage/recovery evidence, and replacement of demo inputs with approved deployment configuration.
+
 Express and MongoDB API for the Sinhala credit catalogue's inquiry flow. This release makes receipt reliable, validates requests, and separates email delivery from submission. The opt-in staff inbox adds institution routing and follow-up statuses. Existing catalogue text and rates are retained unchanged; their current availability has not been verified.
 
 ## Run locally
