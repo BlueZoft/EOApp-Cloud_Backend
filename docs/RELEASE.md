@@ -1,5 +1,11 @@
 # Deployment and release checklist
 
+## Upgrade to 1.2.2
+
+Recreate every API/notification-worker instance together: old worker code does not honor the new lease ownership tokens. No new index or destructive data migration is required. Missing account/session revisions remain compatible as zero; the next provisioning/reset/disable increments the account revision and invalidates old sessions even if a login finishes after session deletion. Confirm staff sign-in/reset/revocation and notification recovery after rollout. Delivery remains at least once.
+
+The matching frontend 1.3.2 clears inaccessible inquiry details, handles malformed staff responses, and fixes short-screen search layout. Backend regression validation passed all 32 tests with MongoDB integration enabled.
+
 ## Required real-world configuration
 
 Copy `.env.example` to an ignored local `.env`, or use your hosting platform's secure variables. Replace every placeholder. Do not put a password in Git, a Docker build argument, a frontend build or an issue/chat message.
@@ -38,7 +44,7 @@ The CA is used only while installing packages, not copied into the final image. 
 
 `.github/workflows/validate.yml` runs dependency installation, all tests with a MongoDB service, and the production dependency audit on pushes/pull requests. Local execution passing does not establish that GitHub-hosted runs have completed; inspect the Actions result for the pushed commit.
 
-Local evidence: all 28 backend tests passed, including authenticated local TLS delivery, institution isolation, CSRF/version checks and explicit proxy trust. The Docker image built and passed readiness, persistence/replay, non-root UID and absent-CA-secret runtime checks. Real provider delivery and production ingress routing still require the real-world values above.
+Local evidence: all 32 backend tests passed, including authenticated local TLS delivery, institution isolation, CSRF/version checks, explicit proxy trust, credential-revision races and stale delivery claims. The Docker image built and passed readiness, persistence/replay and non-root runtime checks. Real provider delivery and production ingress routing still require the real-world values above.
 
 ## Docker-host release in 1.2.1
 

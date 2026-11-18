@@ -3,6 +3,7 @@ const schema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String, required: true, maxlength: 100 },
   passwordHash: { type: String, required: true, select: false },
+  authVersion: { type: Number, default: 0 },
   role: { type: String, enum: ['admin', 'officer'], required: true },
   institutionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Institution', default: null },
   failedLogins: { type: Number, default: 0 }, lockedUntil: Date,

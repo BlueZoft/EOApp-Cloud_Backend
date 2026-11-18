@@ -1,6 +1,6 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { randomUUID } = require('node:crypto');
+const { randomUUID, randomBytes } = require('node:crypto');
 const mongoose = require('mongoose');
 const { createApp } = require('../app');
 const { loadConfig } = require('../config');
@@ -133,13 +133,18 @@ integration('reassignment is blocked during delivery; server-controlled recipien
   await worker.tick(); assert.equal(recipient, 'team-a@local.test');
 });
 integration('pagination is bounded and scoped; legacy records appear new/unassigned to administrators', async () => {
-  await Inquiry.collection.insertOne({ Name: 'Legacy record', NIC: '199012345678', Address: 'private', askLoan: 'Legacy' });
+  await Inquiry.collection.insertMany([
+    { Name: 'Legacy record', NIC: '199012345678', Address: 'private', askLoan: 'Legacy' },
+    { Name: 'Other legacy record', askLoan: 'Legacy' },
+  ]);
   const legacy = await request('inquiries?status=new&institutionId=unassigned', { session: admin });
   assert.ok(legacy.data.inquiries.some(x => x.name === 'Legacy record' && x.status === 'new'));
   const first = await request('inquiries?limit=1', { session: admin });
   assert.equal(first.data.inquiries.length, 1); assert.ok(first.data.nextCursor);
   const next = await request('inquiries?limit=1&before=' + first.data.nextCursor, { session: admin });
   assert.notEqual(first.data.inquiries[0].reference, next.data.inquiries[0].reference);
+  const excludedReference = await request('inquiries?reference=' + first.data.nextCursor + '&before=' + first.data.nextCursor, { session: admin });
+  assert.deepEqual(excludedReference.data.inquiries, []);
   assert.equal((await request('inquiries?limit=1000', { session: admin })).status, 400);
 });
 integration('persistent login lockout and password reprovisioning protect existing accounts', async () => {
@@ -149,6 +154,33 @@ integration('persistent login lockout and password reprovisioning protect existi
   await provisionStaff({ email: 'b@local.test', name: 'Test Officer B', role: 'officer', institutionCode: 'test-b', password });
   assert.equal((await request('session', { session: officerB })).status, 401);
   officerB = await login('b@local.test');
+});
+integration('legacy credential revisions remain usable until an operator resets the account', async () => {
+  const id = new mongoose.Types.ObjectId();
+  const token = randomBytes(32).toString('base64url');
+  const savedSession = { tokenHash: digest(token), staffId: id, expiresAt: new Date(Date.now() + 60000) };
+  await Staff.collection.insertOne({ _id: id, email: 'legacy@local.test', name: 'Legacy admin',
+    role: 'admin', passwordHash: await hashPassword(password), active: true });
+  await Session.collection.insertOne({ ...savedSession });
+  const session = { cookie: 'eoapp_staff=' + token };
+  assert.equal((await request('session', { session })).status, 200);
+  await provisionStaff({ email: 'legacy@local.test', name: 'Legacy admin', role: 'admin', password });
+  await Session.collection.insertOne({ ...savedSession });
+  assert.equal((await request('session', { session })).status, 401);
+});
+integration('a login finishing after password reset cannot create a usable stale session', async () => {
+  const account = { email: 'race@local.test', name: 'Reset race', role: 'admin', password };
+  const oldStaff = await provisionStaff(account);
+  const oldVersion = oldStaff.authVersion || 0;
+  const current = await provisionStaff({ ...account, password: 'new-password-' + randomUUID() });
+  // Simulate a login which verified the old password before reset, but only
+  // saved its session after reset's deleteMany had already completed.
+  const token = randomBytes(32).toString('base64url');
+  await Session.create({ tokenHash: digest(token), staffId: current._id,
+    authVersion: oldVersion, expiresAt: new Date(Date.now() + 60000) });
+  assert.equal((await request('session', { session: { cookie: 'eoapp_staff=' + token } })).status, 401);
+  await Session.updateOne({ tokenHash: digest(token) }, { $set: { authVersion: current.authVersion } });
+  assert.equal((await request('session', { session: { cookie: 'eoapp_staff=' + token } })).status, 200);
 });
 integration('logout, expiry and account disable revoke access; disabled institutions deny existing sessions', async () => {
   await Session.updateOne({ tokenHash: digest(officerB.cookie.split('=')[1]) }, { $set: { expiresAt: new Date(0) } });

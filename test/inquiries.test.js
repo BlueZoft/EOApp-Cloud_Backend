@@ -90,6 +90,35 @@ integration('expired notification leases recover and competing workers claim onc
   await Promise.all([first.tick(), second.tick()]);
   assert.equal(sends, 1); assert.equal((await Model.findById(doc._id)).notification.status, 'sent');
 });
+for (const fails of [false, true]) integration(`a stale notification worker cannot overwrite the newer claim (${fails ? 'failure' : 'success'})`, async () => {
+  await Model.updateMany({}, { $set: { 'notification.status': 'disabled' } });
+  const doc = await Model.create({ ...validateInquiry(payload), submissionKey: 'stale-lease-' + fails,
+    notification: { status: 'pending', nextAttemptAt: new Date(0), attempts: 0 } });
+  let releaseFirst, releaseSecond, claimedFirst, claimedSecond;
+  const firstClaim = new Promise(resolve => { claimedFirst = resolve; });
+  const secondClaim = new Promise(resolve => { claimedSecond = resolve; });
+  const firstGate = new Promise(resolve => { releaseFirst = resolve; });
+  const secondGate = new Promise(resolve => { releaseSecond = resolve; });
+  const first = createNotificationWorker(Model, config, { async sendMail() {
+    claimedFirst(); await firstGate; if (fails) throw new Error('late transport failure');
+  } });
+  const second = createNotificationWorker(Model, config, { async sendMail() { claimedSecond(); await secondGate; } });
+  const firstTick = first.tick(); let secondTick;
+  try {
+    await firstClaim;
+    await Model.updateOne({ _id: doc._id }, { $set: { 'notification.leaseUntil': new Date(0) } });
+    secondTick = second.tick(); await secondClaim;
+    const claimed = await Model.findById(doc._id);
+    if (fails) { releaseSecond(); await secondTick; }
+    releaseFirst(); await firstTick;
+    const updated = await Model.findById(doc._id);
+    assert.equal(updated.notification.status, fails ? 'sent' : 'processing');
+    if (!fails) assert.equal(updated.notification.leaseUntil.getTime(), claimed.notification.leaseUntil.getTime());
+  } finally {
+    releaseFirst(); releaseSecond(); await Promise.all([firstTick, secondTick]);
+  }
+  assert.equal((await Model.findById(doc._id)).notification.status, 'sent');
+});
 test('database write failure returns 500 without internal details or false receipt', async () => {
   const failingModel = { async findOne() { throw new Error('private-database-details'); } };
   const isolated = createApp(config, { Model: failingModel, ready: () => true }).listen(0, '127.0.0.1');

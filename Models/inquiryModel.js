@@ -23,7 +23,7 @@ const schema = new mongoose.Schema({
   notification: {
     recipient: String,
     status: { type: String, enum: ['pending', 'processing', 'sent', 'disabled'] },
-    attempts: { type: Number, default: 0 }, nextAttemptAt: Date, leaseUntil: Date,
+    attempts: { type: Number, default: 0 }, nextAttemptAt: Date, leaseUntil: Date, leaseToken: String,
   },
 }, { timestamps: true, collection: 'users' });
 schema.index({ institutionId: 1, workflowStatus: 1, _id: -1 });

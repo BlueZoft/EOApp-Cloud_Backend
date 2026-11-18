@@ -40,19 +40,26 @@ function createStaffRouter(config, ready) {
     }
     const passwordValid = await verifyPassword(password, staff?.passwordHash);
     const locked = staff?.lockedUntil && staff.lockedUntil > now;
+    // Bind verification to the credential revision read above. A concurrent
+    // operator reset must not admit a login verified against the old hash.
+    const credentials = staff && { _id: staff._id, passwordHash: staff.passwordHash,
+      authVersion: staff.authVersion ? staff.authVersion : { $in: [0, null] } };
     const institutionValid = staff?.role !== 'officer' || (staff.institutionId && await Institution.exists({ _id: staff.institutionId, active: true }));
     if (!staff || !staff.active || !passwordValid || locked || !institutionValid) {
       if (staff && !locked) {
-        const changed = await Staff.findByIdAndUpdate(staff._id, { $inc: { failedLogins: 1 } }, { returnDocument: 'after' });
-        if (changed.failedLogins >= 10) await Staff.updateOne({ _id: staff._id }, { $set: { lockedUntil: new Date(Date.now() + 15 * 60000) } });
+        const changed = await Staff.findOneAndUpdate(credentials, { $inc: { failedLogins: 1 } }, { returnDocument: 'after' });
+        if (changed?.failedLogins >= 10) await Staff.updateOne(credentials, { $set: { lockedUntil: new Date(Date.now() + 15 * 60000) } });
       }
       throw fail(401, 'INVALID_LOGIN', 'Email or password is incorrect');
     }
-    await Staff.updateOne({ _id: staff._id }, { $set: { failedLogins: 0 }, $unset: { lockedUntil: 1 } });
+    const accepted = await Staff.updateOne({ ...credentials, active: true, lockedUntil: { $not: { $gt: new Date() } } },
+      { $set: { failedLogins: 0 }, $unset: { lockedUntil: 1 } });
+    if (!accepted.matchedCount) throw fail(401, 'INVALID_LOGIN', 'Email or password is incorrect');
     const old = sessionToken(req);
     if (old) await Session.deleteOne({ tokenHash: digest(old) });
     const token = randomBytes(32).toString('base64url');
-    await Session.create({ tokenHash: digest(token), staffId: staff._id, expiresAt: new Date(Date.now() + 8 * 3600000) });
+    await Session.create({ tokenHash: digest(token), staffId: staff._id, authVersion: staff.authVersion || 0,
+      expiresAt: new Date(Date.now() + 8 * 3600000) });
     res.cookie(cookieName, token, { ...cookieOptions(config), maxAge: 8 * 3600000 });
     res.json({ staff: staffView(staff), csrfToken: digest('csrf:' + token) });
   });
@@ -88,7 +95,7 @@ function createStaffRouter(config, ready) {
     }
     if (req.query.reference) {
       if (!idValid(req.query.reference)) throw fail(400, 'INVALID_FILTER', 'Invalid reference');
-      filter._id = new mongoose.Types.ObjectId(req.query.reference);
+      filter._id = { ...filter._id, $eq: new mongoose.Types.ObjectId(req.query.reference) };
     }
     const docs = await Inquiry.find(filter).select('Name askLoan Branch institutionId workflowStatus workflowVersion createdAt').sort({ _id: -1 }).limit(limit + 1);
     const hasMore = docs.length > limit; const page = docs.slice(0, limit);

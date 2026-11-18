@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.2 — 2026-11-18
+
+- Bound staff sessions to an account credential revision, incremented atomically by provisioning/reset/disable operations. A login completing after password reset can no longer create a usable session based on the old credentials.
+- Made login admission and failure updates conditional on the verified hash/revision so a concurrent reset or lockout is respected.
+- Added ownership tokens to notification leases. An expired worker's late success/failure cannot overwrite a newer worker's claim or completed delivery.
+- Combined exact inquiry-reference and cursor filters instead of silently discarding the cursor.
+- Added regression coverage for stale delivery workers, reset/session races, legacy revision compatibility and reference/cursor intersection. All 32 backend tests passed with MongoDB enabled; dependency audit found no known vulnerabilities.
+
 ## Synthetic deployment handoff — frontend 1.3.1 (2026-11-16)
 
 Documented the frontend's replaceable synthetic directory/staff/applicant profile, private authenticated STARTTLS capture and operations rehearsal. These use existing API/operator commands in a separate local database; no production seed, default account, runtime dependency or API change is introduced. Real SMTP credential revocation, operational policy approval and production identities remain explicit handoff items.

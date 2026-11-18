@@ -37,7 +37,8 @@ async function authenticate(req, res, next) {
   const token = sessionToken(req);
   const session = token && await Session.findOne({ tokenHash: digest(token), expiresAt: { $gt: new Date() } });
   const staff = session && await Staff.findOne({ _id: session.staffId, active: true });
-  if (!staff || (staff.role === 'officer' && (!staff.institutionId || !await Institution.exists({ _id: staff.institutionId, active: true })))) {
+  if (!staff || (session.authVersion || 0) !== (staff.authVersion || 0) ||
+      (staff.role === 'officer' && (!staff.institutionId || !await Institution.exists({ _id: staff.institutionId, active: true })))) {
     return res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Sign in to continue' } });
   }
   req.staff = staff; req.staffSession = session; req.csrfToken = digest('csrf:' + token);

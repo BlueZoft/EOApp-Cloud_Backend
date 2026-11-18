@@ -46,12 +46,12 @@ async function provisionStaff({ email, name, role, institutionCode, password }) 
   const passwordHash = await hashPassword(password);
   const staff = await Staff.findOneAndUpdate({ email: email.trim().toLowerCase() }, { $set: {
     name: name.trim(), role, institutionId: institution ? institution._id : null, passwordHash, active: true, failedLogins: 0,
-  }, $unset: { lockedUntil: 1 } }, { upsert: true, returnDocument: 'after', runValidators: true });
+  }, $inc: { authVersion: 1 }, $unset: { lockedUntil: 1 } }, { upsert: true, returnDocument: 'after', runValidators: true });
   await Session.deleteMany({ staffId: staff._id });
   return staff;
 }
 async function disableStaff(email) {
-  const staff = await Staff.findOneAndUpdate({ email: email.trim().toLowerCase() }, { $set: { active: false } });
+  const staff = await Staff.findOneAndUpdate({ email: email.trim().toLowerCase() }, { $set: { active: false }, $inc: { authVersion: 1 } });
   if (!staff) throw new Error('Staff account not found');
   await Session.deleteMany({ staffId: staff._id });
 }

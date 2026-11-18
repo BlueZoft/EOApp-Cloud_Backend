@@ -61,6 +61,8 @@ npm run staff -- disable --email REPLACE_WITH_OFFICER_EMAIL
 
 Provisioning an existing email replaces its role, institution and password, re-enables it, clears login lockout and revokes its sessions. Disabling also revokes sessions. This operator command is the password-reset/account-management path for this initial release; there is no public registration/reset endpoint. Passwords are salted scrypt hashes, never plaintext.
 
+In 1.2.2, those operations atomically increment the account's credential revision. Every session must match the current revision, including sessions saved by a login finishing after reset/disable. Old records without a revision use zero until the next operator change; no destructive migration is required.
+
 ## Enable and deploy
 
 Set `STAFF_ENABLED=true`. Production defaults to Secure, HttpOnly, SameSite=Strict cookies. Keep `STAFF_COOKIE_SECURE=true` and serve over HTTPS. Prefer the frontend and API on the same origin behind a reverse proxy. Different ports/subdomains must remain same-site; cross-site cookies are intentionally unsupported. Exact CORS origins and credentials support are configured in the API. Do not weaken SameSite to make unrelated domains work.
@@ -106,3 +108,5 @@ All paths below are under `/api/v1/staff`. Disabled staff access returns 503. Su
 | `PATCH /inquiries/:id` | `{version, status}` or admin-only `{version, institutionId}`; requires `X-CSRF-Token` |
 
 Cross-institution record access returns 404. Unsupported transitions/inputs return 422; forbidden administration/CSRF failures 403; stale updates/busy notification claims 409. Public receipt responses remain minimal and do not expose workflow state or staff data.
+
+All supplied list filters apply together. An exact reference equal to or newer than a `before` cursor returns no match; providing a reference does not override pagination.
